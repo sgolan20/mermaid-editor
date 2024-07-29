@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>עורך Mermaid חי - משודרג ומעוצב</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.3.0/mermaid.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
+            --background-color: #f0f0f0;
+            --text-color: #333;
+            --border-radius: 10px;
+            --transition-speed: 0.3s;
+        }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            margin: 2rem auto;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .editor-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        #input {
+            flex: 1;
+            height: 400px;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: all var(--transition-speed) ease;
+        }
+
+        #input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-color);
+            background: #fff;
+        }
+
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        button, select {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            transition: all var(--transition-speed) ease;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            font-family: 'Rubik', sans-serif;
+        }
+
+        button:hover, select:hover {
+            background-color: #45a049;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        #output {
+            width: 100%;
+            min-height: 400px;
+            background: #fff;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all var(--transition-speed) ease;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            overflow: auto;
+        }
+
+        #output.loading {
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        #output svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+        }
+
+        .theme-toggle:hover {
+            transform: rotate(180deg);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .button-container button:active {
+            animation: pulse 0.3s ease-in-out;
+        }
+
+        #examples, #zoom {
+            background: var(--secondary-color);
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity var(--transition-speed);
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .editor-container { flex-direction: column; }
+            #input, #output { width: 100%; }
+            .button-container { flex-direction: column; }
+            button, select { width: 100%; }
+        }
+
+        /* Dark theme styles */
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #f0f0f0;
+        }
+
+        body.dark-theme .container {
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        body.dark-theme #input {
+            background: rgba(255, 255, 255, 0.1);
+            color: #f0f0f0;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-theme #output {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark-theme button, 
+        body.dark-theme select {
+            background: #4CAF50;
+        }
+
+        body.dark-theme button:hover, 
+        body.dark-theme select:hover {
+            background: #45a049;
+        }
+
+        body.dark-theme .theme-toggle {
+            color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>עורך Mermaid חי - משודרג ומעוצב</h1>
+        <div class="top-bar">
+            <select id="examples" onchange="loadExample()">
+                <option value="">בחר דוגמה</option>
+                <option value="flowchart">תרשים זרימה</option>
+                <option value="sequence">תרשים רצף</option>
+                <option value="gantt">תרשים גאנט</option>
+                <option value="class">תרשים מחלקות</option>
+                <option value="git">תרשים Git</option>
+            </select>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+        <div class="editor-container">
+            <textarea id="input" dir="ltr" placeholder="הזן את קוד ה-Mermaid כאן..."></textarea>
+        </div>
+        <div class="button-container">
+            <button onclick="updateGraph()" class="tooltip">
+                <i class="fas fa-play"></i> עדכן גרף
+                <span class="tooltiptext">עדכן את התצוגה של התרשים</span>
+            </button>
+            <button onclick="copyToClipboard()" class="tooltip">
+                <i class="fas fa-copy"></i> העתק קוד
+                <span class="tooltiptext">העתק את הקוד ללוח</span>
+            </button>
+            <button onclick="clearEditor()" class="tooltip">
+                <i class="fas fa-trash"></i> נקה
+                <span class="tooltiptext">נקה את העורך והתצוגה</span>
+            </button>
+            <button onclick="downloadSVG()" class="tooltip">
+                <i class="fas fa-download"></i> הורד SVG
+                <span class="tooltiptext">הורד את התרשים כקובץ SVG</span>
+            </button>
+            <button onclick="shareLink()" class="tooltip">
+                <i class="fas fa-share"></i> שתף
+                <span class="tooltiptext">צור קישור לשיתוף</span>
+            </button>
+            <select id="zoom" onchange="zoomOutput(this.value)">
+                <option value="1">זום 100%</option>
+                <option value="1.5">זום 150%</option>
+                <option value="2">זום 200%</option>
+            </select>
+        </div>
+        <div id="output"></div>
+        <div id="error-message"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
